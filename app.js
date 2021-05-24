@@ -1,5 +1,6 @@
 const express = require("express");
 const request = require("request");
+const https = require("https");
 
 const app = express();
 
@@ -18,6 +19,37 @@ app.post("/", (req, res) => {
     let firstName = req.body.firstName;
     let lastName = req.body.lastName;
     let email = req.body.email;
+
+    let data = {
+        members : [
+            {
+                email_address: email,
+                status: "subscribed",
+                merge_fields: {
+                    FNAME: firstName,
+                    LNAME: lastName 
+                }
+            }
+        ]
+    };
+
+    let jsonData = JSON.stringify(data);
+
+    const url = "https://us1.api.mailchimp.com/3.0/lists/YOURLISTID";
+
+    const options = {
+        method: "POST",
+        auth: "YOURUSERNAME:YOURAPIKEY"
+    }
+
+    const request = https.request(url, options, (response) => {
+        response.on("data", (data) => {
+            console.log(JSON.parse(data));
+        })
+    });
+
+    request.write(jsonData);
+    request.end();
 
 })
 
